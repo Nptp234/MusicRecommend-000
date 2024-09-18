@@ -1,3 +1,7 @@
 dataset/fma_small/
 dataset/fma_metadata/
+dataset/fma_self_30/
 train_spectrogram_image/
+test_spectrogram_image/
+train_slice_image/
+test_slice_image/

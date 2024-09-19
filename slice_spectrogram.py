@@ -17,7 +17,7 @@ train_path = "train_slice_image"
 def process_spectrogram(file_info):
     f,counter, path = file_info
     if path == train_path:
-        variable = f.split("_")[-2].split("image\\")[1]
+        variable = f.split("_")[-1].split(".")[0]
     else:
         variable = f.split("_")[-1].split("image\\")[1].split(".jpg")[0]
     print(f)

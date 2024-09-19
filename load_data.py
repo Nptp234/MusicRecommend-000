@@ -9,6 +9,8 @@ slice_train_folder = "train_slice_image"
 spectrogram_test_folder = "test_spectrogram_image"
 spectrogram_train_folder = "train_spectrogram_image"
 
+TARGET_SIZE = (128, 128)
+
 genre = {
     "Hip-Hop": 0,
     "International": 1,
@@ -21,13 +23,12 @@ genre = {
 }
 
 #----------
-def convert_labels2hotvector(train_x, test_x, train_y, test_y):
+def convert_labels2hotvector(train_x, test_x, train_y, test_y, genre_new):
     folder_save = "training_data"
     np_utils = keras.utils
     train_y = np_utils.to_categorical(train_y)
     test_y = np_utils.to_categorical(test_y)
     n_classes = len(genre)
-    genre_new = {value: key for key, value in genre.items}
     if os.path.exists(folder_save):
         np.load(f"{folder_save}/train_x.npy")
         np.load(f"{folder_save}/train_y.npy")
@@ -51,13 +52,21 @@ def load_dataset_color(file_path):
     if img is None:
         raise ValueError(f"Image not loaded correctly from path: {file_path}")
     
+    img_resized = cv2.resize(img, TARGET_SIZE)
+    
+    # Filter out None values from image_all and label_all
+    # resized_images = [cv2.resize(img, TARGET_SIZE) if img.shape[:2] != TARGET_SIZE else img for img in filtered_images]
+    
     # Check the number of channels
-    if len(img.shape) == 2:  # Grayscale image
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
-    elif len(img.shape) == 3 and img.shape[2] == 3:  # RGB image
-        img_rgb = img
+    if len(img_resized.shape) == 2:  # Grayscale image
+        img_rgb = cv2.cvtColor(img_resized, cv2.COLOR_GRAY2RGB)
+    elif len(img_resized.shape) == 3 and img_resized.shape[2] == 3:  # RGB image
+        img_rgb = img_resized
     else:
         raise ValueError("Unsupported image format.")
+    
+    # Convert BGR (OpenCV default) to RGB
+    # img_rgb = cv2.cvtColor(img_resized, cv2.COLOR_BGR2RGB)
     
     return img_rgb
 
@@ -73,11 +82,11 @@ def load_dataset_test(dataset_size = 1.0):
     label = []
     for f in file_names:
         image.append(load_dataset_color(f))
-        label.append(os.path.basename(f))
+        label.append(re.search('.*_(.+?)\.jpg', f).group(1))
     images = np.array(image)
         
     return images, label
-
+#-----------------------------------------------------------
 def load_dataset_train(dataset_size = 1.0):
     if not os.path.exists(slice_train_folder) and not os.path.exists(spectrogram_train_folder):
         create_spectrogram_train()
@@ -88,12 +97,11 @@ def load_dataset_train(dataset_size = 1.0):
     image_all = [None]*(len(file_names))
     label_all = [None]*(len(file_names))
     for f in file_names:
-        # index = int(re.sub(r'[^0-9]', '', os.path.basename(f)))
-        # genre_variable = os.path.basename(f)
-        index = re.search(r"\\(\d+)\.jpg$", f)
-        index = int(index.group(1))
-        genre_variable = re.search('train_sliced_images/.*_(.+?)\.jpg', f)
-        genre_variable = genre_variable.group(1)
+        index = int(f[f.rfind('\\') + 1])
+        genre_variable = re.search('.*_(.+?)\.jpg', f).group(1)
+        print(f"Loading {index}_{genre_variable}...")
+        
+        
         image_all[index] = load_dataset_color(f)
         label_all[index] = genre[genre_variable]
     
@@ -110,16 +118,17 @@ def load_dataset_train(dataset_size = 1.0):
                 images.append(image_all[i])
                 labels.append(label_all[i])
                 count_array[label_all[i]]+=1
-    
-    images=np.array(images)
-    labels=np.array(labels)
+    filtered_images = [img for img in images if img is not None]
+    filtered_labels = [label for label in labels if label is not None]
+    images=np.array(filtered_images)
+    labels=np.array(filtered_labels)
     labels = labels.reshape(labels.shape[0], 1)
     train_x, test_x, train_y, test_y = train_test_split(images, labels, test_size=0.05, shuffle=True)
+    genre_new = {value: key for key, value in genre.items()}
     
-    return convert_labels2hotvector(train_x, test_x, train_y, test_y)
+    return convert_labels2hotvector(train_x, test_x, train_y, test_y, genre_new)
     
-    
-train_x, test_x, train_y, test_y = load_dataset_train()
-print(train_x)
+# load_dataset_test()
+
     
         

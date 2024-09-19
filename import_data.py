@@ -45,16 +45,10 @@ def process_file_train(file_info):
             plt.close(fig)
     except IndexError:
         print(f"Track ID {track_id} not found in metadata.")
-        
+
 def process_file_test(file_info):
     print("Process a single MP3 file into a spectrogram.")
     f, count = file_info
-    
-    # # Correctly escape and normalize the file path
-    # pattern = r'dataset[\\/](fma_self_30)[\\/](.+?)\.mp3'
-    # match = re.search(pattern, f)
-    
-    # track_id = int(match.group(1))
     
     try:
         print(f"Processing: {f}")
@@ -129,4 +123,4 @@ def create_spectrogram_test(verbose=1):
     return
 
 # create_spectrogram_train()
-create_spectrogram_test()
+# create_spectrogram_test()

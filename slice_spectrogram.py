@@ -16,6 +16,11 @@ train_path = "train_slice_image"
 #-------
 def process_spectrogram(file_info):
     f,counter, path = file_info
+    if path == train_path:
+        variable = f.split("_")[-2].split("image\\")[1]
+    else:
+        variable = f.split("_")[-1].split("image\\")[1].split(".jpg")[0]
+    print(f)
     img = Image.open(f)
     sub_sample_s = 128
     width, height = img.size
@@ -23,7 +28,7 @@ def process_spectrogram(file_info):
     for i in range(number_of_sample):
         start = i*sub_sample_s
         img_temporary = img.crop((start, 0., start + sub_sample_s, sub_sample_s))
-        img_temporary.save(f"{path}/"+str(counter)+".jpg")
+        img_temporary.save(f"{path}/"+str(counter)+"_"+variable+".jpg")
         counter = counter + 1
 
 #-------
@@ -47,4 +52,4 @@ def slice_spect(path, folder_img, verbose = 1):
     slice_spectrogram(file_names, counter, path)
 
 #-------
-# slice_spect(train_path, train_folder_img)
+slice_spect(train_path, train_folder_img)

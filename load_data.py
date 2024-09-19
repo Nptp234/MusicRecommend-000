@@ -23,25 +23,24 @@ genre = {
 }
 
 #----------
-def convert_labels2hotvector(train_x, test_x, train_y, test_y, genre_new):
+def convert_labels2hotvector(train_x, test_x, train_y, test_y):
     folder_save = "training_data"
     np_utils = keras.utils
     train_y = np_utils.to_categorical(train_y)
     test_y = np_utils.to_categorical(test_y)
-    n_classes = len(genre)
     if os.path.exists(folder_save):
         np.load(f"{folder_save}/train_x.npy")
         np.load(f"{folder_save}/train_y.npy")
         np.load(f"{folder_save}/test_x.npy")
         np.load(f"{folder_save}/test_y.npy")
-        return train_x, train_y, test_x, test_y, n_classes, genre_new
+        return train_x, train_y, test_x, test_y
     
     os.makedirs(folder_save)
     np.save(f"{folder_save}/train_x.npy", train_x)
     np.save(f"{folder_save}/train_y.npy", train_y)
     np.save(f"{folder_save}/test_x.npy", test_x)
     np.save(f"{folder_save}/test_y.npy", test_y)
-    return train_x, train_y, test_x, test_y, n_classes, genre_new
+    return train_x, train_y, test_x, test_y
 
 #-----------
 def load_dataset_color(file_path):
@@ -118,15 +117,20 @@ def load_dataset_train(dataset_size = 1.0):
                 images.append(image_all[i])
                 labels.append(label_all[i])
                 count_array[label_all[i]]+=1
+                
     filtered_images = [img for img in images if img is not None]
     filtered_labels = [label for label in labels if label is not None]
     images=np.array(filtered_images)
     labels=np.array(filtered_labels)
     labels = labels.reshape(labels.shape[0], 1)
+    
     train_x, test_x, train_y, test_y = train_test_split(images, labels, test_size=0.05, shuffle=True)
     genre_new = {value: key for key, value in genre.items()}
+    n_classes = len(genre)
     
-    return convert_labels2hotvector(train_x, test_x, train_y, test_y, genre_new)
+    train_x, train_y, test_x, test_y = convert_labels2hotvector(train_x, test_x, train_y, test_y)
+    
+    return train_x, train_y, test_x, test_y, n_classes, genre_new
     
 # load_dataset_test()
 

@@ -7,15 +7,15 @@ import pandas as pd
 
 saved_model = "saved_model"
 
-train_x, train_y, test_x, test_y, n_classes, genre_new = load_dataset_train()
+train_x, train_y, test_x, test_y, n_classes, genre_new = load_dataset_train(dataset_size=0.75)
 
 # Expand the dimensions of the image to have a channel dimension. (nx128x128) ==> (nx128x128x1)
 # Assuming train_x is a numpy array with shape (9, 128, 128, 3)
-train_x_gray = np.array([cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) for image in train_x])
-train_x = train_x_gray.reshape(train_x.shape[0], train_x.shape[1], train_x.shape[2], 1)
+# train_x_gray = np.array([cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) for image in train_x])
+train_x = train_x.reshape(train_x.shape[0], train_x.shape[1], train_x.shape[2], 3)
 
-test_x_gray = np.array([cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) for image in test_x])
-test_x = test_x_gray.reshape(test_x.shape[0], test_x.shape[1], test_x.shape[2], 1)
+# test_x_gray = np.array([cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) for image in test_x])
+test_x = test_x.reshape(test_x.shape[0], test_x.shape[1], test_x.shape[2], 3)
 
 # Normalize the matrices.
 test_x = test_x/255
@@ -23,7 +23,7 @@ train_x = train_x/255
 
 # Create model
 model = keras.Sequential()
-model.add(keras.layers.Conv2D(filters=64, kernel_size=[7,7], kernel_initializer = initializers.he_normal(seed=1), activation="relu", input_shape=(128,128,1)))
+model.add(keras.layers.Conv2D(filters=64, kernel_size=[7,7], kernel_initializer = initializers.he_normal(seed=1), activation="relu", input_shape=(128,128,3)))
 # Dim = (122x122x64)
 model.add(keras.layers.BatchNormalization())
 model.add(keras.layers.AveragePooling2D(pool_size=[2,2], strides=2))

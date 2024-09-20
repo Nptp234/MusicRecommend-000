@@ -52,4 +52,4 @@ def slice_spect(path, folder_img, verbose = 1):
     slice_spectrogram(file_names, counter, path)
 
 #-------
-slice_spect(train_path, train_folder_img)
+slice_spect(test_path, test_folder_img)

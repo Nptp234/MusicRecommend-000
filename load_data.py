@@ -98,7 +98,7 @@ def load_dataset_train(dataset_size = 1.0):
     for f in file_names:
         index = int(f[f.rfind('\\') + 1])
         genre_variable = re.search('.*_(.+?)\.jpg', f).group(1)
-        print(f"Loading {index}_{genre_variable}...")
+        # print(f"Loading {index}_{genre_variable}...")
         
         
         image_all[index] = load_dataset_color(f)
@@ -112,11 +112,13 @@ def load_dataset_train(dataset_size = 1.0):
         count_array = [0,0,0,0,0,0,0,0]
         images = []
         labels = []
-        for i in range(0,len(image_all)):
-            if (count_array[label_all[i]]<count_max):
+        new_labels = [label for label in label_all if label is not None]
+        print(count_max)
+        for i in range(0,len(new_labels)):
+            if (count_array[new_labels[i]]<count_max):
                 images.append(image_all[i])
-                labels.append(label_all[i])
-                count_array[label_all[i]]+=1
+                labels.append(new_labels[i])
+                count_array[new_labels[i]]+=1
                 
     filtered_images = [img for img in images if img is not None]
     filtered_labels = [label for label in labels if label is not None]
@@ -132,7 +134,7 @@ def load_dataset_train(dataset_size = 1.0):
     
     return train_x, train_y, test_x, test_y, n_classes, genre_new
     
-# load_dataset_test()
+load_dataset_train(dataset_size=0.75)
 
     
         

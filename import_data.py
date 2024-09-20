@@ -1,4 +1,4 @@
-import os
+import os, unidecode
 import pandas as pd
 import re
 import numpy as np
@@ -20,6 +20,15 @@ def metadata():
     trackIdArray = track.iloc[:, 0].values.reshape(-1, 1)
     trackGenreArray = track.iloc[:, 40].values.reshape(-1, 1)
     return trackIdArray, trackGenreArray
+
+def clean_filename(filename):
+    filename = unidecode.unidecode(filename)
+    filename = re.sub(r'[^a-zA-Z0-9-]', ' ', filename)
+    filename = re.sub(r'\s+', ' ', filename).strip()
+    filename = filename.replace(' ', '')
+    filename = filename.replace('-', '')
+    
+    return filename
 
 #------------
 def process_file_train(file_info):
@@ -49,7 +58,6 @@ def process_file_train(file_info):
 def process_file_test(file_info):
     print("Process a single MP3 file into a spectrogram.")
     f, count = file_info
-    
     try:
         print(f"Processing: {f}")
         y, sr = librosa.load(f, sr=None)
@@ -61,7 +69,8 @@ def process_file_test(file_info):
         ax.imshow(mel_db, cmap='gray_r', aspect='auto')
         ax.axis('off')
 
-        output_path = f"{folderTestName}/{count}.jpg"
+        file_name = clean_filename(f.split("\\")[-1].split(".mp3")[0])
+        output_path = f"{folderTestName}/{count}-{file_name}.jpg"
         fig.savefig(output_path, bbox_inches=None, pad_inches=0, dpi=100)
         plt.close(fig)
     except FileNotFoundError as e:
@@ -92,7 +101,7 @@ def create_spectrogram_train(verbose=0):
     
     trackIdArray, trackGenreArray = metadata()
     
-    folderSample = f"{folderName}/fma_small"
+    folderSample = f"{folderName}\\fma_small"
     directions = [os.path.join(folderSample, d) for d in os.listdir(folderSample) if os.path.isdir(os.path.join(folderSample, d))]
     counter = 0
     
@@ -112,7 +121,7 @@ def create_spectrogram_test(verbose=1):
     if os.path.exists('test_spectrogram_image'):
         return
     
-    folderSample = f"{folderName}/fma_self_30"
+    folderSample = f"{folderName}\\fma_self_30"
     
     if verbose > 0:
         print("Converting mp3 audio files into mel Spectrograms ...")
@@ -123,4 +132,4 @@ def create_spectrogram_test(verbose=1):
     return
 
 # create_spectrogram_train()
-# create_spectrogram_test()
+create_spectrogram_test()
